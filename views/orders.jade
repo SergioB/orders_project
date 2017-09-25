@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    script(type='text/javascript').
+        var deleteOrder = function(orderId) {
+            if (confirm('Are you sure you want to delete the order ' + orderId + '?')) {
+                window.location.href="/delete?order="+orderId;
+            }
+        }
+
+    h1
+        a(href="/") Orders
+
+    table
+        thead
+            tr
+                th order Id
+                th Company Name
+                th Customer Address
+                th Ordered Item
+        each order in orders
+            tr
+                td
+                    a(onclick="deleteOrder('#{order.orderId}')")=order.orderId
+                td
+                    a(href="/company?company=#{order.companyName}")=order.companyName
+                td
+                    a(href="/address?address=#{order.customerAddress}")=order.customerAddress
+                td
+                    a(href="/items")=order.orderedItem

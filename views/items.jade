@@ -1,0 +1,10 @@
+extends layout
+
+block content
+
+    h1
+        a(href="/") Items
+
+    ul
+        each item in items
+            li #{item._id}: #{item.count}
