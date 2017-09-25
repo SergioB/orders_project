@@ -53,23 +53,61 @@ router.get('/delete', function (req, res, next) {
         })
 });
 
+const itemsQuery = [
+    {
+        $group: {
+            _id:'$orderedItem',
+            count: { $sum: 1 }
+        }
+    },
+    {
+        $sort : { count : -1, _id: 1 }
+    }
+];
+
 router.get('/items', function (req, res, next) {
     const db = req.db;
     const orders = db.get('orders');
-    orders.aggregate([
-        {
-            $group: {
-                _id:'$orderedItem',
-                count: { $sum: 1 }
-            }
-        },
-        {
-            $sort : { count : -1, _id: 1 }
-        }
-    ]).then ((docs) => {
+    orders.aggregate(itemsQuery).then ((docs) => {
         res.render('items', {'items' : docs});
     });
 });
 
+//
+// REST api routes
+//
+router.get('/api/items', function (req, res, next) {
+    const db = req.db;
+    const orders = db.get('orders');
+    orders.aggregate(itemsQuery).then ((docs) => {
+        res.json( docs);
+    });
+});
+
+
+router.delete('/api/:orderId', function (req, res, next) {
+    const db = req.db;
+    const orders = db.get('orders');
+    orders.remove({'orderId':req.params.orderId})
+        .then(() => {
+        })
+});
+
+router.get('/api', function (req, res, next) {
+    const db = req.db;
+    const orders = db.get('orders');
+    let query = {};
+    if (req.query.company) {
+        query['companyName'] = req.query.company;
+    }
+    if (req.query.address) {
+        query['customerAddress'] = req.query.address;
+    }
+
+    orders.find(query)
+        .then ((docs) => {
+            res.json( docs);
+        });
+});
 
 module.exports = router;
